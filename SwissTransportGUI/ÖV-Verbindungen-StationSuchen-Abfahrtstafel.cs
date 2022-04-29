@@ -14,10 +14,10 @@ namespace SwissTransportGUI
        
        // Transport transport = new Transport();
 
-        public Connections VerbindungSuchen(string StationsName,string  EndStation, DateTime date){
+        public Connections VerbindungSuchen(string StationsName,string  EndStation, DateTime date,DateTime time){
          
          
-            return transport.GetConnections(StationsName, EndStation, date);
+            return transport.GetConnections(StationsName, EndStation, date, time);
       
 
    

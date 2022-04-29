@@ -1,12 +1,12 @@
 using System.Diagnostics;
 using System.Net.Mail;
+using System.Net.NetworkInformation;
 
 namespace SwissTransportGUI;
 
 public partial class Form1 : Form
 {
     private readonly ÖV_Verbindungen_StationSuchen_Abfahrtstafel VerbindugZurKlasse_ÖV = new();
-
     public Form1()
     {
         InitializeComponent();
@@ -20,20 +20,23 @@ public partial class Form1 : Form
 
 
     {
-
-        var Verbindungen = VerbindugZurKlasse_ÖV.VerbindungSuchen(StartStationComboBox.Text, EndStationComboBox.Text,GewählteUhrzeit.Value);
-       
+        try
+        {
+            var Verbindungen = VerbindugZurKlasse_ÖV.VerbindungSuchen(StartStationComboBox.Text, EndStationComboBox.Text, GewählteUhrzeit.Value, UhrZeit.Value);
 
             foreach (var name in Verbindungen.ConnectionList)
             {
                 VerbindungSuchenDataGridView.Rows.Add(name.From.Station.Name, name.To.Station.Name,
-                    string.Format("{0:d}", name.From.Departure), string.Format("{0:d}", name.To.Arrival),
+                    string.Format("{0:t}", name.From.Departure), string.Format("{0:t}", name.To.Arrival),
                     name.From.Platform);
-            }
-        
-        
-        
 
+            }
+
+        }
+        catch
+        {
+            MessageBox.Show("Kein Internet ");
+        }
     }
 
     private void VerbindungSuchenDataGridView_CellContentClick(object sender, DataGridViewCellEventArgs e)
@@ -42,6 +45,7 @@ public partial class Form1 : Form
 
     private void Form1_Load(object sender, EventArgs e)
     {
+        
     }
 
     private void StationSuchenButton_Click(object sender, EventArgs e)
@@ -50,27 +54,37 @@ public partial class Form1 : Form
 
     private void AbfahrtstafelButton_Click(object sender, EventArgs e)
     {
-        var Stationen = VerbindugZurKlasse_ÖV.StationHerausfinden(AbfahrtstafelTextBox.Text);
-        var Scho = VerbindugZurKlasse_ÖV.Abfahrtstafel(AbfahrtstafelTextBox.Text, Stationen.StationList.First().Id);
-        var x = 0;
-        foreach (var Name in Scho.Entries)
-        {
-            if (x != 5)
-            {
-                var Verbindungen = VerbindugZurKlasse_ÖV.VerbindungSuchen(AbfahrtstafelTextBox.Text, Name.To, GewählteUhrzeit.Value);
-                foreach (var NameVerbindungen in Verbindungen.ConnectionList)
-                {
-                    AbfahrtstafelDataGridView.Rows.Add(Name.To, string.Format("{0:t}", NameVerbindungen.To.Arrival));
 
+        try
+        {
+            {
+            var Stationen = VerbindugZurKlasse_ÖV.StationHerausfinden(AbfahrtstafelTextBox.Text);
+            var Scho = VerbindugZurKlasse_ÖV.Abfahrtstafel(AbfahrtstafelTextBox.Text, Stationen.StationList.First().Id);
+            var x = 0;
+            foreach (var Name in Scho.Entries)
+            {
+                if (x != 5)
+                {
+                    var Verbindungen = VerbindugZurKlasse_ÖV.VerbindungSuchen(AbfahrtstafelTextBox.Text, Name.To, GewählteUhrzeit.Value, UhrZeit.Value);
+                    foreach (var NameVerbindungen in Verbindungen.ConnectionList)
+                    {
+                        AbfahrtstafelDataGridView.Rows.Add(Name.To, string.Format("{0:t}", NameVerbindungen.To.Arrival));
+
+                        break;
+                    }
+                }
+                else
+                {
                     break;
                 }
-            }
-            else
-            {
-                break;
-            }
 
-            x++;
+                x++;
+            }
+        }
+    }
+        catch
+        {
+            MessageBox.Show("Kein Internet ");
         }
     }
 
@@ -81,68 +95,104 @@ public partial class Form1 : Form
 
 
 
-        if (StartStationComboBox.Text != "")
+        try
         {
-
-
-            StartStationComboBox.Items.Clear();
-            StartStationComboBox.SelectionStart = StartStationComboBox.Text.Length;
-            var StartStationVorschläge = VerbindugZurKlasse_ÖV.StationHerausfinden(StartStationComboBox.Text);
-
-
-
-            foreach (SwissTransport.Models.Station Station in StartStationVorschläge.StationList)
+            if (StartStationComboBox.Text != "")
             {
-                if(Station.Name != null){
-                    StartStationComboBox.Items.Add(Station.Name);
+
+
+                StartStationComboBox.Items.Clear();
+                StartStationComboBox.SelectionStart = StartStationComboBox.Text.Length;
+                var StartStationVorschläge = VerbindugZurKlasse_ÖV.StationHerausfinden(StartStationComboBox.Text);
+
+
+
+                foreach (SwissTransport.Models.Station Station in StartStationVorschläge.StationList)
+                {
+                    if (Station.Name != null)
+                    {
+                        StartStationComboBox.Items.Add(Station.Name);
+                    }
+
+
                 }
-
-
             }
         }
+            
+        catch
+{
+    MessageBox.Show("Kein Internet ");
+}
     }
 
     private void EndStationComboBox_KeyUp(object sender, KeyEventArgs e)
     {
-       
 
+
+
+    try
+    {
         if (EndStationComboBox.Text != "")
-        {
-
-
-            var EndStationsVorschläge = VerbindugZurKlasse_ÖV.StationHerausfinden(EndStationComboBox.Text);
-
-            
-            EndStationComboBox.Items.Clear();
-
-            foreach (SwissTransport.Models.Station Station in EndStationsVorschläge.StationList)
             {
-                if (Station.Name != null)
+
+                EndStationComboBox.Items.Clear();
+
+                EndStationComboBox.SelectionStart = EndStationComboBox.Text.Length;
+                var EndStationsVorschläge = VerbindugZurKlasse_ÖV.StationHerausfinden(EndStationComboBox.Text);
+
+
+
+                foreach (SwissTransport.Models.Station Station in EndStationsVorschläge.StationList)
                 {
-                    EndStationComboBox.Items.Add(Station.Name);
+                    if (Station.Name != null)
+                    {
+                        EndStationComboBox.Items.Add(Station.Name);
+
+                    }
+
 
                 }
-
-                    EndStationComboBox.SelectionStart = EndStationComboBox.Text.Length;
-
             }
-        }
-
     }
+        catch
+    {
+        MessageBox.Show("Kein Internet ");
+    }
+}
 
     private void MailButton_Click(object sender, EventArgs e)
     {
-       /* Outlook.Application oApp = new Outlook.Application();
-        Outlook._MailItem oMailItem = (Outlook._MailItem)oApp.CreateItem(Outlook.OlItemType.olMailItem);
-        oMailItem.To = address;
-        // body, bcc etc...
-        oMailItem.Display(true);*/
 
+    try
+    {
+        string s = "";
+
+ 
+        foreach (DataGridViewRow row in VerbindungSuchenDataGridView.Rows)
+        {
+        foreach( var cell in row.Cells)
+            {
+                s+=cell.CE;
+            }
+            
+            
+        }
+            Process.Start(new ProcessStartInfo($"mailto:{""}?body={s}") { UseShellExecute = true });
+}
+        catch
+{
+    MessageBox.Show("Kein Internet ");
+}
+    }
+private void GewählteUhrzeit_ValueChanged(object sender, EventArgs e)
+    {
 
     }
 
-    private void DatumCheckBox_CheckedChanged(object sender, EventArgs e)
+    private void WebView_SelectedIndexChanged(object sender, EventArgs e)
     {
 
     }
 }
+
+

@@ -39,7 +39,7 @@
             return this.GetObject<StationBoardRoot>(uri);
         }
 
-        public Connections GetConnections(string fromStation, string toStation,DateTime date)
+        public Connections GetConnections(string fromStation, string toStation,DateTime date, DateTime time)
         {
             if (string.IsNullOrEmpty(fromStation))
             {
@@ -50,7 +50,7 @@
             {
                 throw new ArgumentNullException(nameof(toStation));
             }
-            var uri = new Uri($"{WebApiHost}connections?from={fromStation}&to={toStation}&date={date.ToString("yyyy-MM-dd")}&limit=10");
+            var uri = new Uri($"{WebApiHost}connections?from={fromStation}&to={toStation}&date={date.ToString("yyyy-MM-dd")}&time={time.ToString("hh:mm")}& limit=10");
             return this.GetObject<Connections>(uri);
         }
 

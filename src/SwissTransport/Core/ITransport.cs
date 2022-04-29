@@ -11,6 +11,6 @@ namespace SwissTransport.Core
 
         StationBoardRoot GetStationBoard(string station, string id);
 
-        Connections GetConnections(string fromStation, string toStation, DateTime dateTime);
+        Connections GetConnections(string fromStation, string toStation, DateTime date,DateTime time);
     }
 }
